@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- ====================================================================
+  DEV NOTE — HOW THIS FILE IS ORGANIZED
+  ====================================================================
+  This is a single-file starter framework. Everything lives here so you
+  can see how the pieces connect. When you're ready, you can split it:
+
+    <style>  block  ->  styles.css   (link it with <link rel="stylesheet">)
+    <script> block  ->  script.js    (link it with <script src="..." defer>)
+
+  THE GOLDEN RULE OF THIS FRAMEWORK:
+  All "cosmetics" (colors, fonts, spacing, corner rounding, shadows) are
+  defined ONCE as CSS variables in the [1] THEME section of the <style>
+  block. Change a variable there and the whole site updates. You should
+  almost never need to touch the component CSS below it.
+
+  Search this file for:
+    [CUSTOMIZE]  ->  spots where you drop in your own content/cosmetics
+    DEV NOTE     ->  explanations of how something works
+==================================================================== -->
+
+<!-- [CUSTOMIZE] Page title + description (what shows in tabs & Google) -->
+<title>Your Site Name</title>
+<meta name="description" content="One sentence describing what this site is about.">
+
+<!-- [CUSTOMIZE] FONTS: To use a Google Font, uncomment the lines below,
+     swap in your font, then update - -font-display / - -font-body in the
+     THEME section. Example shown for "Inter":
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+-->
+
+<!-- DEV NOTE: This tiny script adds a "js" class to <html> immediately.
+     CSS uses it so scroll-reveal animations only hide content when
+     JavaScript is actually running. If JS fails, nothing disappears. -->
+<script>document.documentElement.classList.add('js');</script>
+
+<style>
+/* =====================================================================
+   TABLE OF CONTENTS
+   [1] THEME — your cosmetics live here (edit this section!)
+   [2] RESET & BASE — sensible defaults (rarely needs editing)
+   [3] LAYOUT HELPERS — .container, .section, .grid
+   [4] COMPONENTS — header, buttons, cards, tabs, accordion, form,
+                    modal, back-to-top, footer
+   [5] STATES & ANIMATION — scroll-reveal, active states
+   [6] RESPONSIVE — mobile breakpoint rules
+===================================================================== */
+
+
+/* =====================================================================
+   [1] THEME  — ✂ YOUR COSMETICS GO HERE ✂
+   ---------------------------------------------------------------------
+   Every color, font, and size below cascades through the entire site.
+   Treat this block as your "paint bucket".
+===================================================================== */
+:root {
+  /* ---- COLORS ------------------------------------------------------
+     [CUSTOMIZE] Swap these hex values for your brand palette.        */
+  --color-bg:          #f7f7f8;   /* page background                  */
+  --color-surface:     #ffffff;   /* cards, header, panels            */
+  --color-text:        #17181c;   /* main text                        */
+  --color-text-muted:  #5b6068;   /* secondary text, captions         */
+  --color-accent:      #4f46e5;   /* buttons, links, highlights       */
+  --color-accent-hover:#4338ca;   /* accent on hover                  */
+  --color-on-accent:   #ffffff;   /* text sitting on accent color     */
+  --color-border:      #e2e4e9;   /* hairlines and card borders       */
+
+  /* ---- TYPOGRAPHY --------------------------------------------------
+     [CUSTOMIZE] --font-display = headings, --font-body = everything
+     else. The serif default is intentional so you can SEE which slot
+     controls what — replace both with your own fonts.               */
+  --font-display: Georgia, 'Times New Roman', serif;
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* Type scale — clamp(min, preferred, max) keeps text fluid between
+     phone and desktop without media queries.                        */
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   clamp(1.25rem, 2.5vw, 1.5rem);
+  --text-2xl:  clamp(1.6rem, 3.5vw, 2.1rem);
+  --text-hero: clamp(2.1rem, 5.5vw, 3.4rem);
+
+  /* ---- SPACING SCALE ------------------------------------------------
+     Use these instead of raw pixel values so spacing stays rhythmic. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2.5rem;
+  --space-6: 4rem;
+
+  /* ---- SHAPE & EFFECTS ----------------------------------------------
+     [CUSTOMIZE] radius 0 = sharp/brutalist, 999px = pill-shaped.     */
+  --radius:     10px;
+  --shadow-sm:  0 1px 3px rgba(0,0,0,.07);
+  --shadow-md:  0 8px 24px rgba(0,0,0,.10);
+  --transition: 180ms ease;
+
+  /* ---- STRUCTURE ---------------------------------------------------*/
+  --container-max: 1100px;  /* max content width                      */
+  --header-height: 64px;    /* keep in sync with the real header      */
+}
+
+/* DEV NOTE: Dark theme. The JS theme toggle flips data-theme on <html>.
+   Only override the colors that change — everything else is inherited.
+   [CUSTOMIZE] Tune these for your own dark palette.                  */
+[data-theme="dark"] {
+  --color-bg:          #131417;
+  --color-surface:     #1d1f24;
+  --color-text:        #eceef2;
+  --color-text-muted:  #9aa0aa;
+  --color-accent:      #818cf8;
+  --color-accent-hover:#a5b0ff;
+  --color-on-accent:   #14151a;
+  --color-border:      #2c2f36;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.4);
+  --shadow-md: 0 8px 24px rgba(0,0,0,.5);
+}
+
+
+/* =====================================================================
+   [2] RESET & BASE — you can mostly ignore this section
+===================================================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;                 /* smooth anchor scrolling  */
+  scroll-padding-top: var(--header-height);/* anchors clear the header */
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--color-text);
+  background: var(--color-bg);
+  transition: background var(--transition), color var(--transition);
+}
+
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; }
+
+img { max-width: 100%; display: block; }
+
+a { color: var(--color-accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Visible keyboard focus — an accessibility must. [CUSTOMIZE] color. */
+:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* DEV NOTE: Respect users who turn off animations in their OS.
+   Leave this in — it costs nothing and helps motion-sensitive users. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Utility: hide visually but keep readable for screen readers */
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+
+/* =====================================================================
+   [3] LAYOUT HELPERS
+===================================================================== */
+/* Centers content and adds side padding. Wrap every section's
+   content in one of these.                                           */
+.container {
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+
+/* Standard vertical rhythm between page sections */
+.section { padding-block: var(--space-6); }
+
+/* Reusable "eyebrow + heading + intro" pattern for section tops */
+.section-head { max-width: 60ch; margin-bottom: var(--space-5); }
+.section-head .eyebrow {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.section-head h2 { font-size: var(--text-2xl); margin-top: var(--space-1); }
+.section-head p  { color: var(--color-text-muted); margin-top: var(--space-2); }
+
+/* Responsive card grid — auto-fits as many 260px+ columns as fit.
+   [CUSTOMIZE] Change 260px to control when cards wrap.               */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-4);
+}
+
+
+/* =====================================================================
+   [4] COMPONENTS
+===================================================================== */
+
+/* ---- SITE HEADER / NAV --------------------------------------------- */
+.site-header {
+  position: sticky; top: 0; z-index: 50;
+  height: var(--header-height);
+  background: var(--color-surface);
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+/* JS adds .is-scrolled once you scroll — gives the header a shadow */
+.site-header.is-scrolled {
+  border-bottom-color: var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+.site-header .container {
+  height: 100%;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--space-3);
+}
+.brand {
+  font-family: var(--font-display);
+  font-weight: 700; font-size: var(--text-lg);
+  color: var(--color-text);
+}
+.brand:hover { text-decoration: none; }
+
+.site-nav ul {
+  display: flex; gap: var(--space-4); list-style: none;
+}
+.site-nav a {
+  color: var(--color-text-muted);
+  font-weight: 500;
+  padding-block: var(--space-1);
+  border-bottom: 2px solid transparent;
+}
+.site-nav a:hover { color: var(--color-text); text-decoration: none; }
+/* JS scroll-spy adds .is-active to the link for the section on screen */
+.site-nav a.is-active {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+.header-actions { display: flex; align-items: center; gap: var(--space-2); }
+
+/* Hamburger — hidden on desktop, shown by the [6] RESPONSIVE section */
+.nav-toggle {
+  display: none;
+  background: none; border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-lg);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+/* ---- BUTTONS --------------------------------------------------------
+   Two variants. Use class="btn btn-primary" or "btn btn-ghost".
+   [CUSTOMIZE] Add more variants (btn-danger, btn-outline...) by
+   copying the pattern.                                               */
+.btn {
+  display: inline-block;
+  font: inherit; font-weight: 600;
+  padding: 0.65em 1.4em;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition),
+              border-color var(--transition), color var(--transition);
+}
+.btn:hover { text-decoration: none; transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+
+.btn-primary { background: var(--color-accent); color: var(--color-on-accent); }
+.btn-primary:hover { background: var(--color-accent-hover); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+.btn-ghost:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+/* ---- HERO ---------------------------------------------------------- */
+.hero { padding-block: var(--space-6); text-align: center; }
+.hero h1 { font-size: var(--text-hero); max-width: 20ch; margin-inline: auto; }
+.hero p {
+  font-size: var(--text-lg);
+  color: var(--color-text-muted);
+  max-width: 55ch;
+  margin: var(--space-3) auto var(--space-5);
+}
+.hero .btn-row { display: flex; gap: var(--space-3); justify-content: center; flex-wrap: wrap; }
+
+/* ---- CARDS ---------------------------------------------------------- */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.card h3 { font-size: var(--text-xl); margin-bottom: var(--space-2); }
+.card p  { color: var(--color-text-muted); font-size: var(--text-sm); }
+/* [CUSTOMIZE] Placeholder icon box — swap for an <img> or SVG icon */
+.card .icon {
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  color: var(--color-accent);
+  font-size: var(--text-xl);
+  margin-bottom: var(--space-3);
+}
+
+/* ---- TABS ----------------------------------------------------------- */
+.tabs .tablist {
+  display: flex; gap: var(--space-2); flex-wrap: wrap;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-4);
+}
+.tabs [role="tab"] {
+  background: none; border: none; cursor: pointer;
+  font: inherit; font-weight: 600;
+  color: var(--color-text-muted);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px; /* overlaps the tablist border */
+}
+.tabs [role="tab"][aria-selected="true"] {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+.tabs [role="tabpanel"] { color: var(--color-text-muted); max-width: 65ch; }
+
+/* ---- ACCORDION (FAQ) ------------------------------------------------ */
+.accordion {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+.accordion-item + .accordion-item { border-top: 1px solid var(--color-border); }
+.accordion-trigger {
+  width: 100%;
+  display: flex; justify-content: space-between; align-items: center;
+  gap: var(--space-3);
+  background: none; border: none; cursor: pointer;
+  font: inherit; font-weight: 600; text-align: left;
+  color: var(--color-text);
+  padding: var(--space-3) var(--space-4);
+}
+.accordion-trigger .chevron { transition: transform var(--transition); }
+.accordion-trigger[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+.accordion-panel {
+  padding: 0 var(--space-4) var(--space-3);
+  color: var(--color-text-muted);
+}
+
+/* ---- FORM ------------------------------------------------------------ */
+.form { display: grid; gap: var(--space-3); max-width: 560px; }
+.form label { font-weight: 600; font-size: var(--text-sm); }
+.form input, .form textarea {
+  width: 100%;
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  margin-top: var(--space-1);
+}
+.form input:focus, .form textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 25%, transparent);
+}
+.field-error { color: #d33; font-size: var(--text-sm); margin-top: var(--space-1); }
+.form-status { font-weight: 600; }
+.form-status.is-success { color: #2c9c5a; }
+
+/* ---- MODAL (native <dialog>) ----------------------------------------- */
+.modal {
+  border: none;
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-5);
+  max-width: min(92vw, 480px);
+  margin: auto; /* centers the dialog */
+}
+.modal::backdrop { background: rgba(0,0,0,.5); }
+.modal h3 { font-size: var(--text-xl); margin-bottom: var(--space-2); }
+.modal p  { color: var(--color-text-muted); margin-bottom: var(--space-4); }
+
+/* ---- BACK TO TOP ------------------------------------------------------ */
+.back-to-top {
+  position: fixed; right: var(--space-4); bottom: var(--space-4); z-index: 40;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-lg);
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  opacity: 0; pointer-events: none; translate: 0 8px;
+  transition: opacity var(--transition), translate var(--transition);
+}
+/* JS adds .is-visible after you scroll down a bit */
+.back-to-top.is-visible { opacity: 1; pointer-events: auto; translate: 0 0; }
+
+/* ---- FOOTER ------------------------------------------------------------ */
+.site-footer {
+  border-top: 1px solid var(--color-border);
+  padding-block: var(--space-5);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+.site-footer .container {
+  display: flex; justify-content: space-between; gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+
+/* =====================================================================
+   [5] STATES & ANIMATION
+   DEV NOTE: Add data-reveal to ANY element and JS fades it in when it
+   scrolls into view. The ".js" guard means content never hides if
+   JavaScript is off.
+===================================================================== */
+.js [data-reveal] {
+  opacity: 0;
+  translate: 0 18px;
+  transition: opacity .5s ease, translate .5s ease;
+}
+.js [data-reveal].is-visible { opacity: 1; translate: 0 0; }
+
+
+/* =====================================================================
+   [6] RESPONSIVE — mobile adjustments
+   [CUSTOMIZE] 720px is the breakpoint; change once here if needed.
+===================================================================== */
+@media (max-width: 720px) {
+  .nav-toggle { display: block; }         /* show hamburger            */
+
+  /* Nav becomes a dropdown panel under the header */
+  .site-nav {
+    position: absolute;
+    top: var(--header-height); left: 0; right: 0;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: var(--shadow-md);
+    display: none;
+    padding: var(--space-3) var(--space-4);
+  }
+  .site-nav ul { flex-direction: column; gap: var(--space-3); }
+  /* JS toggles .nav-open on the header to show/hide the panel */
+  .site-header.nav-open .site-nav { display: block; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =====================================================================
+     SITE HEADER
+     [CUSTOMIZE] Brand name + nav links. Each nav href="#id" must match
+     a section id below — scroll-spy and smooth scrolling depend on it.
+===================================================================== -->
+<header class="site-header" id="site-header">
+  <div class="container">
+    <a class="brand" href="#top">Your Site Name</a>
+
+    <nav class="site-nav" aria-label="Main navigation">
+      <ul>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#details">Details</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+
+    <div class="header-actions">
+      <!-- Theme toggle — wired up by initThemeToggle() -->
+      <button class="btn btn-ghost" id="theme-toggle" aria-label="Toggle dark mode">☾</button>
+      <!-- Hamburger — wired up by initMobileNav() -->
+      <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="site-header" aria-label="Open menu">☰</button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ===================================================================
+       HERO
+       [CUSTOMIZE] Your headline, subline, and primary calls to action.
+       The second button opens the demo modal (see data-modal-open).
+  =================================================================== -->
+  <section class="hero container">
+    <h1 data-reveal>A headline that says what you do</h1>
+    <p data-reveal>One or two supporting sentences. Replace this with your pitch — keep it under ~40 words so it stays scannable.</p>
+    <div class="btn-row" data-reveal>
+      <a class="btn btn-primary" href="#contact">Primary action</a>
+      <button class="btn btn-ghost" data-modal-open="demo-modal">Open a modal</button>
+    </div>
+  </section>
+
+  <!-- ===================================================================
+       FEATURES / CARDS
+       [CUSTOMIZE] Duplicate or delete <article class="card"> blocks —
+       the grid automatically reflows. Swap the .icon glyphs for your
+       own SVGs or images.
+  =================================================================== -->
+  <section class="section" id="features">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow">Features</p>
+        <h2>Three things worth showing off</h2>
+        <p>Use cards for features, services, products, team members — anything that comes in sets.</p>
+      </div>
+
+      <div class="grid">
+        <article class="card" data-reveal>
+          <div class="icon" aria-hidden="true">◆</div>
+          <h3>Card title one</h3>
+          <p>A sentence or two describing this item. Keep card copy roughly the same length so the row looks even.</p>
+        </article>
+
+        <article class="card" data-reveal>
+          <div class="icon" aria-hidden="true">●</div>
+          <h3>Card title two</h3>
+          <p>Cards lift slightly on hover. Adjust or remove that in the CARDS component section of the CSS.</p>
+        </article>
+
+        <article class="card" data-reveal>
+          <div class="icon" aria-hidden="true">▲</div>
+          <h3>Card title three</h3>
+          <p>Add a fourth card and the grid wraps automatically — no CSS changes needed.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================
+       TABS
+       DEV NOTE: aria-controls on each tab button must match the id of
+       its panel. initTabs() handles clicking + left/right arrow keys.
+       [CUSTOMIZE] Add a tab = add one button + one matching panel.
+  =================================================================== -->
+  <section class="section" id="details">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow">Details</p>
+        <h2>Tabbed content</h2>
+        <p>Good for specs, pricing tiers, "how it works" steps — content that shares one space.</p>
+      </div>
+
+      <div class="tabs" data-reveal>
+        <div class="tablist" role="tablist" aria-label="Details tabs">
+          <button role="tab" id="tab-1" aria-controls="panel-1" aria-selected="true">First tab</button>
+          <button role="tab" id="tab-2" aria-controls="panel-2" aria-selected="false">Second tab</button>
+          <button role="tab" id="tab-3" aria-controls="panel-3" aria-selected="false">Third tab</button>
+        </div>
+
+        <div role="tabpanel" id="panel-1" aria-labelledby="tab-1">
+          <p>Content for the first tab. Any HTML works in here — text, images, even a card grid.</p>
+        </div>
+        <div role="tabpanel" id="panel-2" aria-labelledby="tab-2" hidden>
+          <p>Second tab content. Panels use the native <code>hidden</code> attribute, so they're invisible to screen readers too when closed.</p>
+        </div>
+        <div role="tabpanel" id="panel-3" aria-labelledby="tab-3" hidden>
+          <p>Third tab content. Try the left and right arrow keys while a tab is focused.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================
+       ACCORDION / FAQ
+       [CUSTOMIZE] Duplicate .accordion-item blocks. Keep each trigger's
+       aria-controls matched to its panel's id.
+  =================================================================== -->
+  <section class="section" id="faq">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow">FAQ</p>
+        <h2>Common questions</h2>
+      </div>
+
+      <div class="accordion" data-reveal>
+        <div class="accordion-item">
+          <button class="accordion-trigger" aria-expanded="false" aria-controls="faq-1">
+            How do I change the colors and fonts?
+            <span class="chevron" aria-hidden="true">▾</span>
+          </button>
+          <div class="accordion-panel" id="faq-1" hidden>
+            <p>Open the <strong>[1] THEME</strong> section at the top of the CSS. Every cosmetic value is a variable there — change it once, it updates everywhere.</p>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-trigger" aria-expanded="false" aria-controls="faq-2">
+            How do I add a new section?
+            <span class="chevron" aria-hidden="true">▾</span>
+          </button>
+          <div class="accordion-panel" id="faq-2" hidden>
+            <p>Copy any <code>&lt;section class="section" id="..."&gt;</code> block, give it a new id, and add a matching link in the header nav. Scroll-spy and smooth scrolling pick it up automatically.</p>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-trigger" aria-expanded="false" aria-controls="faq-3">
+            Can more than one answer stay open?
+            <span class="chevron" aria-hidden="true">▾</span>
+          </button>
+          <div class="accordion-panel" id="faq-3" hidden>
+            <p>Yes — set <code>accordionSingleOpen: false</code> in the CONFIG object at the top of the JavaScript.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================
+       CONTACT FORM
+       DEV NOTE: The form is front-end only. initContactForm() validates
+       it and fakes a success message. Search the JS for "REPLACE WITH
+       YOUR BACKEND" to wire it to a real endpoint or email service.
+  =================================================================== -->
+  <section class="section" id="contact">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow">Contact</p>
+        <h2>Get in touch</h2>
+      </div>
+
+      <form class="form" id="contact-form" novalidate data-reveal>
+        <div>
+          <label for="cf-name">Name</label>
+          <input id="cf-name" name="name" type="text" required autocomplete="name">
+          <p class="field-error" data-error-for="cf-name" hidden>Please enter your name.</p>
+        </div>
+        <div>
+          <label for="cf-email">Email</label>
+          <input id="cf-email" name="email" type="email" required autocomplete="email">
+          <p class="field-error" data-error-for="cf-email" hidden>Please enter a valid email address.</p>
+        </div>
+        <div>
+          <label for="cf-message">Message</label>
+          <textarea id="cf-message" name="message" rows="4" required></textarea>
+          <p class="field-error" data-error-for="cf-message" hidden>Please write a short message.</p>
+        </div>
+        <button class="btn btn-primary" type="submit">Send message</button>
+        <!-- aria-live announces the result to screen readers -->
+        <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<!-- =====================================================================
+     FOOTER  — [CUSTOMIZE] your name/links. Year fills in automatically.
+===================================================================== -->
+<footer class="site-footer">
+  <div class="container">
+    <p>© <span id="footer-year"></span> Your Site Name</p>
+    <p><a href="#top">Back to top ↑</a></p>
+  </div>
+</footer>
+
+<!-- =====================================================================
+     MODAL
+     DEV NOTE: Uses the native <dialog> element — the browser handles
+     focus trapping and the Escape key for free.
+     Open it from ANY element with data-modal-open="demo-modal".
+     [CUSTOMIZE] Duplicate this block with a new id for more modals.
+===================================================================== -->
+<dialog class="modal" id="demo-modal">
+  <h3>A reusable modal</h3>
+  <p>Put announcements, sign-up prompts, image lightboxes, or confirmations here. Click the backdrop or press Escape to close.</p>
+  <button class="btn btn-primary" data-modal-close>Close</button>
+</dialog>
+
+<!-- Back-to-top button — shown by JS after you scroll down -->
+<button class="back-to-top" id="back-to-top" aria-label="Back to top">↑</button>
+
+
+<script>
+/* =====================================================================
+   DEVELOPER NOTES — JAVASCRIPT ARCHITECTURE
+   ---------------------------------------------------------------------
+   Every behavior is its own small init function. init() at the bottom
+   calls them all once the page loads. To remove a feature, delete (or
+   comment out) ONE line in init(). To add one, write a function and
+   add a line. Nothing here depends on any library.
+===================================================================== */
+
+/* ---- CONFIG ----------------------------------------------------------
+   [CUSTOMIZE] Behavior knobs, all in one place.                        */
+const CONFIG = {
+  stickyShadowAfter: 8,      // px scrolled before header gets a shadow
+  backToTopAfter: 400,       // px scrolled before ↑ button appears
+  revealThreshold: 0.15,     // how much of an element must be visible
+                             // before it fades in (0–1)
+  accordionSingleOpen: true, // true = opening one answer closes others
+};
+
+
+/* ----------------------------------------------------------------------
+   initMobileNav()
+   WHAT IT DOES: Wires the hamburger button. Toggles the .nav-open class
+   on the header (CSS shows/hides the menu) and keeps aria-expanded in
+   sync for screen readers. Also closes the menu when a link is tapped.
+---------------------------------------------------------------------- */
+function initMobileNav() {
+  const header = document.getElementById('site-header');
+  const toggle = document.getElementById('nav-toggle');
+  if (!header || !toggle) return;
+
+  toggle.addEventListener('click', () => {
+    const open = header.classList.toggle('nav-open');
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.textContent = open ? '✕' : '☰';
+  });
+
+  // Close the panel after choosing a destination
+  header.querySelectorAll('.site-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+      header.classList.remove('nav-open');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.textContent = '☰';
+    });
+  });
+}
+
+
+/* ----------------------------------------------------------------------
+   initStickyHeader()
+   WHAT IT DOES: Adds .is-scrolled to the header once the user scrolls
+   past CONFIG.stickyShadowAfter, which the CSS turns into a subtle
+   border + shadow so the sticky header reads as "floating".
+---------------------------------------------------------------------- */
+function initStickyHeader() {
+  const header = document.getElementById('site-header');
+  if (!header) return;
+  const update = () =>
+    header.classList.toggle('is-scrolled', window.scrollY > CONFIG.stickyShadowAfter);
+  window.addEventListener('scroll', update, { passive: true });
+  update(); // set correct state on load (e.g. refreshed mid-page)
+}
+
+
+/* ----------------------------------------------------------------------
+   initScrollSpy()
+   WHAT IT DOES: Watches each section that has an id matching a nav link
+   and highlights that link (.is-active) while the section is on screen.
+   HOW: IntersectionObserver — no scroll math, very cheap to run.
+---------------------------------------------------------------------- */
+function initScrollSpy() {
+  const links = [...document.querySelectorAll('.site-nav a[href^="#"]')];
+  if (!links.length) return;
+
+  const sections = links
+    .map(link => document.querySelector(link.hash))
+    .filter(Boolean);
+
+  const spy = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      links.forEach(l =>
+        l.classList.toggle('is-active', l.hash === '#' + entry.target.id));
+    });
+  }, { rootMargin: '-40% 0px -55% 0px' }); // triggers near screen middle
+
+  sections.forEach(s => spy.observe(s));
+}
+
+
+/* ----------------------------------------------------------------------
+   initRevealOnScroll()
+   WHAT IT DOES: Fades in any element with data-reveal the first time it
+   scrolls into view, then stops watching it (the animation runs once).
+   Users with "reduce motion" enabled see everything immediately.
+---------------------------------------------------------------------- */
+function initRevealOnScroll() {
+  const targets = document.querySelectorAll('[data-reveal]');
+  if (!targets.length) return;
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion || !('IntersectionObserver' in window)) {
+    targets.forEach(el => el.classList.add('is-visible'));
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        obs.unobserve(entry.target); // animate once, then forget
+      }
+    });
+  }, { threshold: CONFIG.revealThreshold });
+
+  targets.forEach(el => observer.observe(el));
+}
+
+
+/* ----------------------------------------------------------------------
+   initModals()
+   WHAT IT DOES: Opens any <dialog> via data-modal-open="its-id" and
+   closes via data-modal-close or a click on the backdrop. The native
+   <dialog> element gives us Escape-to-close and focus trapping free.
+---------------------------------------------------------------------- */
+function initModals() {
+  // Openers
+  document.querySelectorAll('[data-modal-open]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dialog = document.getElementById(btn.dataset.modalOpen);
+      if (dialog) dialog.showModal();
+    });
+  });
+
+  document.querySelectorAll('dialog.modal').forEach(dialog => {
+    // Close buttons inside the modal
+    dialog.querySelectorAll('[data-modal-close]').forEach(btn =>
+      btn.addEventListener('click', () => dialog.close()));
+
+    // Backdrop click: a click on the <dialog> itself (not its children)
+    // means the user clicked the dimmed area outside the content box.
+    dialog.addEventListener('click', e => {
+      if (e.target === dialog) dialog.close();
+    });
+  });
+}
+
+
+/* ----------------------------------------------------------------------
+   initAccordions()
+   WHAT IT DOES: Toggles FAQ answers. Each trigger button flips its own
+   aria-expanded and the matching panel's hidden attribute. If
+   CONFIG.accordionSingleOpen is true, opening one closes the others.
+---------------------------------------------------------------------- */
+function initAccordions() {
+  document.querySelectorAll('.accordion').forEach(acc => {
+    const triggers = acc.querySelectorAll('.accordion-trigger');
+
+    triggers.forEach(trigger => {
+      trigger.addEventListener('click', () => {
+        const panel = document.getElementById(trigger.getAttribute('aria-controls'));
+        const isOpen = trigger.getAttribute('aria-expanded') === 'true';
+
+        if (CONFIG.accordionSingleOpen) {
+          triggers.forEach(t => {
+            t.setAttribute('aria-expanded', 'false');
+            const p = document.getElementById(t.getAttribute('aria-controls'));
+            if (p) p.hidden = true;
+          });
+        }
+
+        trigger.setAttribute('aria-expanded', String(!isOpen));
+        if (panel) panel.hidden = isOpen;
+      });
+    });
+  });
+}
+
+
+/* ----------------------------------------------------------------------
+   initTabs()
+   WHAT IT DOES: Classic accessible tabs. Click a tab (or use ←/→ arrow
+   keys) to show its panel and hide the rest. aria-selected drives the
+   underline styling in CSS.
+---------------------------------------------------------------------- */
+function initTabs() {
+  document.querySelectorAll('.tabs').forEach(widget => {
+    const tabs = [...widget.querySelectorAll('[role="tab"]')];
+
+    const select = tab => {
+      tabs.forEach(t => {
+        const selected = t === tab;
+        t.setAttribute('aria-selected', String(selected));
+        const panel = document.getElementById(t.getAttribute('aria-controls'));
+        if (panel) panel.hidden = !selected;
+      });
+      tab.focus();
+    };
+
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => select(tab));
+      tab.addEventListener('keydown', e => {
+        if (e.key === 'ArrowRight') select(tabs[(i + 1) % tabs.length]);
+        if (e.key === 'ArrowLeft')  select(tabs[(i - 1 + tabs.length) % tabs.length]);
+      });
+    });
+  });
+}
+
+
+/* ----------------------------------------------------------------------
+   initContactForm()
+   WHAT IT DOES: Validates the contact form (required fields + email
+   shape), shows inline errors, and displays a success message.
+   ⚠ It does NOT actually send anything yet — see the marked line.
+---------------------------------------------------------------------- */
+function initContactForm() {
+  const form = document.getElementById('contact-form');
+  if (!form) return;
+  const status = document.getElementById('form-status');
+
+  const showError = (input, show) => {
+    const msg = form.querySelector(`[data-error-for="${input.id}"]`);
+    if (msg) msg.hidden = !show;
+  };
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    let valid = true;
+
+    form.querySelectorAll('input, textarea').forEach(input => {
+      // checkValidity() uses the browser's built-in rules
+      // (required, type="email", etc.) — no regex needed.
+      const ok = input.checkValidity();
+      showError(input, !ok);
+      if (!ok) valid = false;
+    });
+
+    if (!valid) { status.textContent = ''; return; }
+
+    /* >>> REPLACE WITH YOUR BACKEND <<<
+       Swap the block below for a real submission, e.g.:
+       await fetch('/api/contact', {
+         method: 'POST',
+         body: new FormData(form),
+       });
+       Services like Formspree/Netlify Forms also work with plain HTML. */
+    status.textContent = 'Sending…';
+    setTimeout(() => {
+      status.textContent = 'Message sent! (demo — wire up a backend to really send it)';
+      status.classList.add('is-success');
+      form.reset();
+    }, 700);
+  });
+}
+
+
+/* ----------------------------------------------------------------------
+   initBackToTop()
+   WHAT IT DOES: Shows the floating ↑ button after the user scrolls
+   CONFIG.backToTopAfter pixels; clicking it scrolls smoothly to top.
+---------------------------------------------------------------------- */
+function initBackToTop() {
+  const btn = document.getElementById('back-to-top');
+  if (!btn) return;
+
+  window.addEventListener('scroll', () => {
+    btn.classList.toggle('is-visible', window.scrollY > CONFIG.backToTopAfter);
+  }, { passive: true });
+
+  btn.addEventListener('click', () =>
+    window.scrollTo({ top: 0, behavior: 'smooth' }));
+}
+
+
+/* ----------------------------------------------------------------------
+   initThemeToggle()
+   WHAT IT DOES: Flips data-theme on <html> between "light" and "dark".
+   The [1] THEME CSS section defines what each theme looks like.
+   DEV NOTE: The choice resets on refresh here because sandboxed
+   previews block storage APIs. When you host this yourself, uncomment
+   the two localStorage lines to remember the visitor's choice.
+---------------------------------------------------------------------- */
+function initThemeToggle() {
+  const btn = document.getElementById('theme-toggle');
+  if (!btn) return;
+  const root = document.documentElement;
+
+  // const saved = localStorage.getItem('theme');            // ← uncomment when hosted
+  // if (saved) root.dataset.theme = saved;
+
+  const syncIcon = () =>
+    btn.textContent = root.dataset.theme === 'dark' ? '☀' : '☾';
+
+  btn.addEventListener('click', () => {
+    root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    // localStorage.setItem('theme', root.dataset.theme);    // ← uncomment when hosted
+    syncIcon();
+  });
+
+  syncIcon();
+}
+
+
+/* ----------------------------------------------------------------------
+   setFooterYear() — writes the current year into the footer ©.
+---------------------------------------------------------------------- */
+function setFooterYear() {
+  const el = document.getElementById('footer-year');
+  if (el) el.textContent = new Date().getFullYear();
+}
+
+
+/* ----------------------------------------------------------------------
+   init() — the master switchboard. Comment out a line to disable
+   that feature; add your own initSomething() calls here.
+---------------------------------------------------------------------- */
+function init() {
+  initMobileNav();
+  initStickyHeader();
+  initScrollSpy();
+  initRevealOnScroll();
+  initModals();
+  initAccordions();
+  initTabs();
+  initContactForm();
+  initBackToTop();
+  initThemeToggle();
+  setFooterYear();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
